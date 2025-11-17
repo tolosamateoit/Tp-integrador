@@ -17,7 +17,7 @@
 ✅ **Funcionalidades Avanzadas**
 - 🔍 Búsqueda de productos por nombre
 - 🚫 Validación de precios (no negativos)
-- 📊 Ordenamiento de productos por ID
+- 📊 Ordenamiento de productos (por ID, nombre, precio ascendente/descendente)
 - 💾 Persistencia de datos en base de datos MySQL
 
 ✅ **Interfaz Amigable**
@@ -109,6 +109,15 @@ http://localhost:8080/productos
 2. Haz clic en **"Buscar"**
 3. Para volver a la lista completa, haz clic en **"Limpiar"**
 
+### Ordenar Productos
+
+1. En el selector "Ordenar por", elige una opción:
+   - **ID**: Orden por ID (por defecto)
+   - **Nombre (A-Z)**: Orden alfabético
+   - **Precio (Menor a Mayor)**: Orden ascendente por precio
+   - **Precio (Mayor a Menor)**: Orden descendente por precio
+2. La lista se actualiza automáticamente
+
 ### Editar un Producto
 
 1. En la tabla, localiza el producto
@@ -133,13 +142,26 @@ CarritoCompras/
 │   ├── main/
 │   │   ├── java/com/ecommerce/carritocompras/
 │   │   │   ├── modelo/
-│   │   │   │   └── Producto.java
+│   │   │   │   └── Producto.java              # Entidad JPA
+│   │   │   ├── dto/
+│   │   │   │   └── ProductoDTO.java           # Objeto de transferencia
 │   │   │   ├── repositorio/
-│   │   │   │   └── ProductoRepositorio.java
+│   │   │   │   └── ProductoRepositorio.java    # Interfaz de acceso a datos
 │   │   │   ├── servicio/
-│   │   │   │   └── ProductoServicio.java
+│   │   │   │   ├── ProductoServicioInterface.java
+│   │   │   │   └── ProductoServicio.java      # Lógica de negocio
+│   │   │   ├── usecase/
+│   │   │   │   ├── CrearProductoUseCase.java
+│   │   │   │   ├── ActualizarProductoUseCase.java
+│   │   │   │   └── EliminarProductoUseCase.java
+│   │   │   ├── mapper/
+│   │   │   │   └── ProductoMapper.java         # Conversión Entidad <-> DTO
+│   │   │   ├── exception/
+│   │   │   │   └── ExceptionHandler.java      # Manejo centralizado de errores
 │   │   │   ├── controlador/
-│   │   │   │   └── ProductoControlador.java
+│   │   │   │   └── ProductoControlador.java  # Controlador MVC
+│   │   │   ├── util/
+│   │   │   │   └── Constantes.java            # Constantes del sistema
 │   │   │   └── CarritoComprasApplication.java
 │   │   ├── resources/
 │   │   │   ├── application.properties
@@ -149,10 +171,22 @@ CarritoCompras/
 │   └── test/
 ├── pom.xml
 ├── README.md
-├── Dockerfile                    # Imagen de la aplicación Spring Boot
-├── docker-compose.yml            # Orquestación: MySQL + App
-└── .env                          # Variables de entorno (puerto, DB, credenciales)
+├── Dockerfile
+├── docker-compose.yml
+└── .env
 ```
+
+### Organización del Código
+
+El proyecto está organizado en capas siguiendo una arquitectura en capas:
+
+- **Controlador**: Maneja las peticiones HTTP y delega al servicio
+- **Servicio**: Orquesta los casos de uso y coordina la lógica de negocio
+- **UseCase**: Encapsula operaciones específicas (crear, actualizar, eliminar)
+- **Repositorio**: Acceso a la base de datos mediante Spring Data JPA
+- **DTO**: Objetos de transferencia que separan la entidad de la capa de presentación
+- **Mapper**: Convierte entre entidades JPA y DTOs
+- **Exception Handler**: Maneja excepciones de forma centralizada
 
 ---
 
@@ -189,6 +223,12 @@ CarritoCompras/
 
 - 🔒 La eliminación es "lógica" (soft delete) - los datos no se borran, solo se marcan como inactivos
 - ✏️ Los productos eliminados no aparecen en la lista, pero los datos permanecen en la BD
+
+### Timestamps Automáticos
+
+- Los campos `created_at` y `updated_at` se establecen automáticamente mediante anotaciones JPA
+- `created_at` se asigna al crear el producto
+- `updated_at` se actualiza cada vez que se modifica el producto
 
 ---
 

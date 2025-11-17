@@ -1,70 +1,83 @@
 package com.ecommerce.carritocompras.servicio;
 
+import com.ecommerce.carritocompras.dto.ProductoDTO;
+import com.ecommerce.carritocompras.mapper.ProductoMapper;
 import com.ecommerce.carritocompras.modelo.Producto;
 import com.ecommerce.carritocompras.repositorio.ProductoRepositorio;
+import com.ecommerce.carritocompras.usecase.ActualizarProductoUseCase;
+import com.ecommerce.carritocompras.usecase.CrearProductoUseCase;
+import com.ecommerce.carritocompras.usecase.EliminarProductoUseCase;
+import com.ecommerce.carritocompras.util.Constantes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ProductoServicio {
+public class ProductoServicio implements ProductoServicioInterface {
 
     @Autowired
     private ProductoRepositorio productoRepositorio;
 
-    public List<Producto> obtenerTodosLosProductos() {
-        return productoRepositorio.findAllActivos();
+    @Autowired
+    private ProductoMapper productoMapper;
+
+    @Autowired
+    private CrearProductoUseCase crearProductoUseCase;
+
+    @Autowired
+    private ActualizarProductoUseCase actualizarProductoUseCase;
+
+    @Autowired
+    private EliminarProductoUseCase eliminarProductoUseCase;
+
+    public List<ProductoDTO> obtenerTodosLosProductos() {
+        List<Producto> productos = productoRepositorio.findAllActivos();
+        return productoMapper.toDTOList(productos);
     }
 
-    public Optional<Producto> obtenerProductoPorId(Long id) {
+    public ProductoDTO obtenerProductoPorId(Long id) {
         Optional<Producto> producto = productoRepositorio.findById(id);
-        if (producto.isPresent() && producto.get().getActivo()) {
-            return producto;
+        if (producto.isEmpty() || !producto.get().getActivo()) {
+            throw new RuntimeException(Constantes.MSG_PRODUCTO_NO_ENCONTRADO);
         }
-        return Optional.empty();
+        return productoMapper.toDTO(producto.get());
     }
 
-    public Producto crearProducto(Producto producto) {
-        if (producto.getPrecio() == null || producto.getPrecio() < 0) {
-            throw new IllegalArgumentException("El precio no puede ser negativo o nulo");
-        }
-        producto.setActivo(true);
-        producto.setCreatedAt(LocalDateTime.now());
-        producto.setUpdatedAt(LocalDateTime.now());
-        return productoRepositorio.save(producto);
+    public ProductoDTO crearProducto(ProductoDTO productoDTO) {
+        return crearProductoUseCase.ejecutar(productoDTO);
     }
 
-    public Producto actualizarProducto(Long id, Producto productoActualizado) {
-        Optional<Producto> productoExistente = productoRepositorio.findById(id);
-        if (productoExistente.isPresent()) {
-            if (productoActualizado.getPrecio() == null || productoActualizado.getPrecio() < 0) {
-                throw new IllegalArgumentException("El precio no puede ser negativo o nulo");
-            }
-            Producto producto = productoExistente.get();
-            producto.setNombre(productoActualizado.getNombre());
-            producto.setDescripcion(productoActualizado.getDescripcion());
-            producto.setPrecio(productoActualizado.getPrecio());
-            producto.setUpdatedAt(LocalDateTime.now());
-            return productoRepositorio.save(producto);
-        }
-        return null;
+    public ProductoDTO actualizarProducto(Long id, ProductoDTO productoDTO) {
+        return actualizarProductoUseCase.ejecutar(id, productoDTO);
     }
 
-    public boolean eliminarProducto(Long id) {
-        Optional<Producto> producto = productoRepositorio.findById(id);
-        if (producto.isPresent()) {
-            Producto p = producto.get();
-            p.setActivo(false);
-            p.setUpdatedAt(LocalDateTime.now());
-            productoRepositorio.save(p);
-            return true;
-        }
-        return false;
+    public void eliminarProducto(Long id) {
+        eliminarProductoUseCase.ejecutar(id);
     }
 
-    public List<Producto> buscarProductos(String nombre) {
-        return productoRepositorio.findByNombreContainingAndActivo(nombre, true);
+    public List<ProductoDTO> buscarProductos(String nombre) {
+        List<Producto> productos = productoRepositorio.findByNombreContainingAndActivo(nombre, true);
+        return productoMapper.toDTOList(productos);
     }
+
+    public List<ProductoDTO> ordenarProductos(List<ProductoDTO> productosDTO, String campo) {
+        if (productosDTO == null || productosDTO.isEmpty()) {
+            return productosDTO;
+        }
+        
+        return switch (campo.toLowerCase()) {
+            case Constantes.ORDENAR_NOMBRE -> productosDTO.stream()
+                    .sorted((p1, p2) -> p1.getNombre().compareToIgnoreCase(p2.getNombre()))
+                    .toList();
+            case Constantes.ORDENAR_PRECIO -> productosDTO.stream()
+                    .sorted((p1, p2) -> Double.compare(p1.getPrecio(), p2.getPrecio()))
+                    .toList();
+            case Constantes.ORDENAR_PRECIO_DESC -> productosDTO.stream()
+                    .sorted((p1, p2) -> Double.compare(p2.getPrecio(), p1.getPrecio()))
+                    .toList();
+            default -> productosDTO;
+        };
+    }
+
 }

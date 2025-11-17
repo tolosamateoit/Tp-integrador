@@ -1,86 +1,107 @@
 package com.ecommerce.carritocompras.controlador;
 
-import com.ecommerce.carritocompras.modelo.Producto;
-import com.ecommerce.carritocompras.servicio.ProductoServicio;
+import com.ecommerce.carritocompras.dto.ProductoDTO;
+import com.ecommerce.carritocompras.servicio.ProductoServicioInterface;
+import com.ecommerce.carritocompras.util.Constantes;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 public class ProductoControlador {
 
     @Autowired
-    private ProductoServicio productoServicio;
+    private ProductoServicioInterface productoServicio;
 
-    @GetMapping("/productos")
-    public String listarProductos(Model model, @RequestParam(value = "buscar", required = false) String buscar) {
+    @GetMapping(Constantes.RUTA_PRODUCTOS)
+    public String listarProductos(
+            Model model, 
+            @RequestParam(value = "buscar", required = false) String buscar,
+            @RequestParam(value = "ordenar", required = false, defaultValue = "id") String ordenar) {
+        
+        List<ProductoDTO> productos;
+        
         if (buscar != null && !buscar.isEmpty()) {
-            model.addAttribute("productos", productoServicio.buscarProductos(buscar));
-            model.addAttribute("buscar", buscar);
-            model.addAttribute("buscando", true);
+            productos = productoServicio.buscarProductos(buscar);
+            model.addAttribute(Constantes.ATTR_BUSCAR, buscar);
+            model.addAttribute(Constantes.ATTR_BUSCANDO, true);
         } else {
-            model.addAttribute("productos", productoServicio.obtenerTodosLosProductos());
-            model.addAttribute("buscando", false);
+            productos = productoServicio.obtenerTodosLosProductos();
+            model.addAttribute(Constantes.ATTR_BUSCANDO, false);
         }
-        model.addAttribute("nuevoProducto", new Producto());
-        return "productos";
+        
+        productos = productoServicio.ordenarProductos(productos, ordenar);
+        
+        model.addAttribute(Constantes.ATTR_PRODUCTOS, productos);
+        model.addAttribute(Constantes.ATTR_ORDENAR, ordenar);
+        model.addAttribute(Constantes.ATTR_NUEVO_PRODUCTO, new ProductoDTO());
+        return Constantes.VISTA_PRODUCTOS;
     }
 
-    @PostMapping("/productos/crear")
-    public String crearProducto(Producto producto, RedirectAttributes redirectAttributes) {
-        try {
-            productoServicio.crearProducto(producto);
-            redirectAttributes.addFlashAttribute("mensaje", "✅ Producto creado exitosamente");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "❌ Error al crear el producto: " + e.getMessage());
+    @PostMapping(Constantes.RUTA_PRODUCTOS_CREAR)
+    public String crearProducto(
+            @Valid ProductoDTO productoDTO, 
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        
+        if (bindingResult.hasErrors()) {
+            model.addAttribute(Constantes.ATTR_PRODUCTOS, productoServicio.obtenerTodosLosProductos());
+            model.addAttribute(Constantes.ATTR_NUEVO_PRODUCTO, productoDTO);
+            model.addAttribute(Constantes.ATTR_ERROR, Constantes.MSG_ERROR_FORMULARIO);
+            return Constantes.VISTA_PRODUCTOS;
         }
-        return "redirect:/productos";
+        
+        productoServicio.crearProducto(productoDTO);
+        redirectAttributes.addFlashAttribute(Constantes.ATTR_MENSAJE, Constantes.MSG_PRODUCTO_CREADO);
+        return Constantes.REDIRECT_PRODUCTOS;
     }
 
-    @GetMapping("/productos/editar/{id}")
+    @GetMapping(Constantes.RUTA_PRODUCTOS_EDITAR)
     public String editarFormulario(@PathVariable Long id, Model model) {
-        var producto = productoServicio.obtenerProductoPorId(id);
-        if (producto.isPresent()) {
-            model.addAttribute("producto", producto.get());
-            model.addAttribute("productos", productoServicio.obtenerTodosLosProductos());
-            model.addAttribute("nuevoProducto", new Producto());
-            model.addAttribute("editando", true);
-            return "productos";
-        }
-        return "redirect:/productos";
+        ProductoDTO producto = productoServicio.obtenerProductoPorId(id);
+        model.addAttribute(Constantes.ATTR_PRODUCTO, producto);
+        model.addAttribute(Constantes.ATTR_PRODUCTOS, productoServicio.obtenerTodosLosProductos());
+        model.addAttribute(Constantes.ATTR_NUEVO_PRODUCTO, new ProductoDTO());
+        model.addAttribute(Constantes.ATTR_EDITANDO, true);
+        return Constantes.VISTA_PRODUCTOS;
     }
 
-    @PostMapping("/productos/actualizar/{id}")
-    public String actualizarProducto(@PathVariable Long id, Producto productoActualizado, RedirectAttributes redirectAttributes) {
-        try {
-            Producto actualizado = productoServicio.actualizarProducto(id, productoActualizado);
-            if (actualizado != null) {
-                redirectAttributes.addFlashAttribute("mensaje", "✅ Producto actualizado exitosamente");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "❌ Producto no encontrado");
-            }
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "❌ Error al actualizar: " + e.getMessage());
+    @PostMapping(Constantes.RUTA_PRODUCTOS_ACTUALIZAR)
+    public String actualizarProducto(
+            @PathVariable Long id, 
+            @Valid ProductoDTO productoDTO,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        
+        if (bindingResult.hasErrors()) {
+            model.addAttribute(Constantes.ATTR_PRODUCTO, productoDTO);
+            model.addAttribute(Constantes.ATTR_PRODUCTOS, productoServicio.obtenerTodosLosProductos());
+            model.addAttribute(Constantes.ATTR_NUEVO_PRODUCTO, new ProductoDTO());
+            model.addAttribute(Constantes.ATTR_EDITANDO, true);
+            model.addAttribute(Constantes.ATTR_ERROR, Constantes.MSG_ERROR_FORMULARIO);
+            return Constantes.VISTA_PRODUCTOS;
         }
-        return "redirect:/productos";
+        
+        productoServicio.actualizarProducto(id, productoDTO);
+        redirectAttributes.addFlashAttribute(Constantes.ATTR_MENSAJE, Constantes.MSG_PRODUCTO_ACTUALIZADO);
+        return Constantes.REDIRECT_PRODUCTOS;
     }
 
-    @GetMapping("/productos/eliminar/{id}")
+    @GetMapping(Constantes.RUTA_PRODUCTOS_ELIMINAR)
     public String eliminarProducto(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            if (productoServicio.eliminarProducto(id)) {
-                redirectAttributes.addFlashAttribute("mensaje", "✅ Producto eliminado exitosamente");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "❌ Producto no encontrado");
-            }
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "❌ Error al eliminar: " + e.getMessage());
-        }
-        return "redirect:/productos";
+        productoServicio.eliminarProducto(id);
+        redirectAttributes.addFlashAttribute(Constantes.ATTR_MENSAJE, Constantes.MSG_PRODUCTO_ELIMINADO);
+        return Constantes.REDIRECT_PRODUCTOS;
     }
 }

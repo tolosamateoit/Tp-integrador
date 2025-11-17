@@ -169,6 +169,19 @@
             border-color: #667eea;
         }
 
+        .form-group input.error-field, .form-group textarea.error-field {
+            border-color: #e74c3c;
+            background-color: #fee;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+            font-weight: bold;
+        }
+
         .form-group textarea {
             resize: vertical;
             min-height: 80px;
@@ -357,6 +370,15 @@
                 <button type="submit">Buscar</button>
                 <a href="/productos" class="btn-reset">Limpiar</a>
             </form>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <label for="ordenar" style="color: white; font-weight: bold;">Ordenar por:</label>
+                <select id="ordenar" name="ordenar" onchange="window.location.href='/productos?ordenar=' + this.value + (/*[[${buscar}]]*/ '' ? '&buscar=' + /*[[${buscar}]]*/ '' : '')" style="padding: 10px; border-radius: 8px; border: none; font-size: 1em;">
+                    <option value="id" th:selected="${ordenar == 'id'}">ID</option>
+                    <option value="nombre" th:selected="${ordenar == 'nombre'}">Nombre (A-Z)</option>
+                    <option value="precio" th:selected="${ordenar == 'precio'}">Precio (Menor a Mayor)</option>
+                    <option value="precio-desc" th:selected="${ordenar == 'precio-desc'}">Precio (Mayor a Menor)</option>
+                </select>
+            </div>
             <button class="btn-primary" onclick="toggleForm()">➕ Nuevo Producto</button>
         </div>
 
@@ -364,18 +386,21 @@
         <div class="form-section" id="formContainer" style="display: none;">
             <h2 th:text="${editando} ? 'Editar Producto' : 'Crear Nuevo Producto'">Crear Nuevo Producto</h2>
             
-            <form th:if="${editando}" th:action="@{/productos/actualizar/{id}(id=${producto.id})}" method="post">
+            <form th:if="${editando}" th:action="@{/productos/actualizar/{id}(id=${producto.id})}" method="post" th:object="${producto}">
                 <div class="form-group">
                     <label for="nombre">Nombre del Producto *</label>
-                    <input type="text" id="nombre" name="nombre" th:value="${producto.nombre}" required>
+                    <input type="text" id="nombre" name="nombre" th:field="*{nombre}" th:class="${#fields.hasErrors('nombre')} ? 'error-field'" required>
+                    <span th:if="${#fields.hasErrors('nombre')}" class="error-message" th:errors="*{nombre}"></span>
                 </div>
                 <div class="form-group">
                     <label for="descripcion">Descripción</label>
-                    <textarea id="descripcion" name="descripcion" th:text="${producto.descripcion}"></textarea>
+                    <textarea id="descripcion" name="descripcion" th:field="*{descripcion}" th:class="${#fields.hasErrors('descripcion')} ? 'error-field'"></textarea>
+                    <span th:if="${#fields.hasErrors('descripcion')}" class="error-message" th:errors="*{descripcion}"></span>
                 </div>
                 <div class="form-group">
                     <label for="precio">Precio (min 0) *</label>
-                    <input type="number" id="precio" name="precio" th:value="${producto.precio}" step="0.01" min="0" required>
+                    <input type="number" id="precio" name="precio" th:field="*{precio}" step="0.01" min="0" th:class="${#fields.hasErrors('precio')} ? 'error-field'" required>
+                    <span th:if="${#fields.hasErrors('precio')}" class="error-message" th:errors="*{precio}"></span>
                 </div>
                 <div class="form-buttons">
                     <button type="submit" class="btn-save">💾 Guardar Cambios</button>
@@ -383,18 +408,21 @@
                 </div>
             </form>
 
-            <form th:unless="${editando}" action="/productos/crear" method="post">
+            <form th:unless="${editando}" action="/productos/crear" method="post" th:object="${nuevoProducto}">
                 <div class="form-group">
                     <label for="nombre">Nombre del Producto *</label>
-                    <input type="text" id="nombre" name="nombre" required>
+                    <input type="text" id="nombre" name="nombre" th:field="*{nombre}" th:class="${#fields.hasErrors('nombre')} ? 'error-field'" required>
+                    <span th:if="${#fields.hasErrors('nombre')}" class="error-message" th:errors="*{nombre}"></span>
                 </div>
                 <div class="form-group">
                     <label for="descripcion">Descripción</label>
-                    <textarea id="descripcion" name="descripcion"></textarea>
+                    <textarea id="descripcion" name="descripcion" th:field="*{descripcion}" th:class="${#fields.hasErrors('descripcion')} ? 'error-field'"></textarea>
+                    <span th:if="${#fields.hasErrors('descripcion')}" class="error-message" th:errors="*{descripcion}"></span>
                 </div>
                 <div class="form-group">
                     <label for="precio">Precio (min 0) *</label>
-                    <input type="number" id="precio" name="precio" step="0.01" min="0" required>
+                    <input type="number" id="precio" name="precio" th:field="*{precio}" step="0.01" min="0" th:class="${#fields.hasErrors('precio')} ? 'error-field'" required>
+                    <span th:if="${#fields.hasErrors('precio')}" class="error-message" th:errors="*{precio}"></span>
                 </div>
                 <div class="form-buttons">
                     <button type="submit" class="btn-save">➕ Crear Producto</button>
@@ -450,19 +478,21 @@
     <script th:inline="javascript">
         // Variable para saber si estamos editando (evaluado por Thymeleaf)
         const estaEditando = /*[[${editando ?: false}]]*/ false;
+        const hayErrores = /*[[${error != null}]]*/ false;
 
         function toggleForm() {
             const formContainer = document.getElementById('formContainer');
             formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
             if (formContainer.style.display === 'block') {
                 formContainer.scrollIntoView({ behavior: 'smooth' });
-                document.getElementById('nombre').focus();
+                const nombreField = document.getElementById('nombre');
+                if (nombreField) nombreField.focus();
             }
         }
 
-        // Mostrar formulario si estamos editando
+        // Mostrar formulario si estamos editando o si hay errores de validación
         window.addEventListener('load', function() {
-            if (estaEditando) {
+            if (estaEditando || hayErrores) {
                 document.getElementById('formContainer').style.display = 'block';
             }
         });

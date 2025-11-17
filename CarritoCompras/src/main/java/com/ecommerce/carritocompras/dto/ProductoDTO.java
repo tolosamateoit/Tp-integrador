@@ -1,29 +1,17 @@
-package com.ecommerce.carritocompras.modelo;
+package com.ecommerce.carritocompras.dto;
 
-import com.ecommerce.carritocompras.util.Constantes;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import com.ecommerce.carritocompras.util.Constantes;
+
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "producto")
-public class Producto {
+public class ProductoDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     @NotBlank(message = Constantes.MSG_VALIDACION_NOMBRE_OBLIGATORIO)
     @Size(max = Constantes.MAX_LONGITUD_NOMBRE, message = Constantes.MSG_VALIDACION_NOMBRE_MAX)
     private String nombre;
@@ -31,42 +19,22 @@ public class Producto {
     @Size(max = Constantes.MAX_LONGITUD_DESCRIPCION, message = Constantes.MSG_VALIDACION_DESCRIPCION_MAX)
     private String descripcion;
 
-    @Column(nullable = false)
     @NotNull(message = Constantes.MSG_VALIDACION_PRECIO_NULO)
     @Min(value = 0, message = Constantes.MSG_VALIDACION_PRECIO_NEGATIVO)
     private Double precio;
 
-    @Column(nullable = false)
-    private Boolean activo = true;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
+    private Boolean activo;
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Producto() {
+    public ProductoDTO() {
     }
 
-    public Producto(String nombre, String descripcion, Double precio) {
+    public ProductoDTO(Long id, String nombre, String descripcion, Double precio) {
+        this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
-        this.activo = true;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-        if (this.activo == null) {
-            this.activo = true;
-        }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -125,3 +93,4 @@ public class Producto {
         this.updatedAt = updatedAt;
     }
 }
+
