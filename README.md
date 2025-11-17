@@ -28,39 +28,6 @@
 
 ---
 
-## 📦 Requisitos Previos
-
-Antes de instalar el proyecto, asegúrate de tener instalado en tu computadora:
-
-### Software Requerido
-
-| Requisito | Versión | Descarga |
-|-----------|---------|----------|
-| **Java JDK** | 17 o superior | [https://www.oracle.com/java/technologies/downloads/](https://www.oracle.com/java/technologies/downloads/) |
-| **Maven** | 3.8+ | [https://maven.apache.org/download.cgi](https://maven.apache.org/download.cgi) |
-| **MySQL** | 8.0+ | [https://www.mysql.com/downloads/](https://www.mysql.com/downloads/) |
-| **Git** | Cualquier versión | [https://git-scm.com/](https://git-scm.com/) |
-
-### Verificar Instalaciones
-
-Abre una terminal/PowerShell y ejecuta:
-
-```bash
-# Verificar Java
-java -version
-
-# Verificar Maven
-mvn -version
-
-# Verificar MySQL
-mysql --version
-
-# Verificar Git
-git --version
-```
-
----
-
 ## 🚀 Instrucciones de Instalación
 
 ### Paso 1: Clonar el Repositorio
@@ -70,71 +37,59 @@ git clone https://github.com/tolosamateoit/Tp-integrador.git
 cd Tp-integrador/CarritoCompras
 ```
 
-### Paso 2: Crear la Base de Datos MySQL
-
-Abre MySQL en tu terminal:
+### Paso 2: instalar docker
+```bash
+https://www.docker.com/products/docker-desktop/
+```
 
 ```bash
 mysql -u root -p
 ```
 
-Ingresa tu contraseña de MySQL y luego ejecuta:
-
-```sql
-CREATE DATABASE demo_jpa;
-USE demo_jpa;
-```
-
-### Paso 3: Configurar la Contraseña de MySQL
+### Paso 3: Ejecutar el Proyecto con Docker 🐳
 
 El proyecto está configurado por defecto con:
 - **Usuario:** `root`
 - **Contraseña:** `admin`
 
-**Si tu contraseña es diferente**, edita el archivo:
-```
-CarritoCompras/src/main/resources/application.properties
-```
+El proyecto incluye:
 
-Y cambia la línea:
-```properties
-spring.datasource.password=admin
-```
+Un contenedor MySQL
 
-Por tu contraseña actual.
+Un contenedor con la aplicación Spring Boot
 
-### Paso 4: Compilar el Proyecto
+Un archivo .env con las variables necesarias
 
-En la terminal (dentro de la carpeta `CarritoCompras`), ejecuta:
 
+Para iniciar todo, abra la terminal cmd, posicionandose en la carpeta raiz del proyecto .../Tp-integrador/CarritoCompras
+y ejecute el comando:
 ```bash
-mvn clean compile -DskipTests
+docker-compose up --build
+
 ```
+
 
 Este comando:
-- Limpia compilaciones anteriores (`clean`)
-- Compila todo el código (`compile`)
-- Omite las pruebas (`-DskipTests`)
 
-**Resultado esperado:** Deberías ver `BUILD SUCCESS`
+-Descarga las imágenes necesarias
 
-### Paso 5: Ejecutar la Aplicación
+-Construye la imagen del proyecto
 
+-Crea la base de datos automáticamente
+
+-Inicia la aplicación
+
+Cuando vea:
+
+"Started CarritoComprasApplication"
+
+la app ya está funcionando.
+
+
+### Paso 4: 🌐 Acceder a la Aplicación
+
+Ingresar desde el navegador a:
 ```bash
-mvn spring-boot:run
-```
-
-Espera a que veas el mensaje:
-```
-Tomcat started on port 8080 (http) with context path '/'
-Started CarritoComprasApplication in X.XXX seconds
-```
-
-### Paso 6: Acceder a la Aplicación
-
-Abre tu navegador web y ve a:
-
-```
 http://localhost:8080/productos
 ```
 
@@ -183,37 +138,41 @@ CarritoCompras/
 │   ├── main/
 │   │   ├── java/com/ecommerce/carritocompras/
 │   │   │   ├── modelo/
-│   │   │   │   └── Producto.java           # Entidad JPA
+│   │   │   │   └── Producto.java
 │   │   │   ├── repositorio/
-│   │   │   │   └── ProductoRepositorio.java # Data Access Layer
+│   │   │   │   └── ProductoRepositorio.java
 │   │   │   ├── servicio/
-│   │   │   │   └── ProductoServicio.java    # Business Logic
+│   │   │   │   └── ProductoServicio.java
 │   │   │   ├── controlador/
-│   │   │   │   └── ProductoControlador.java # HTTP Endpoints
+│   │   │   │   └── ProductoControlador.java
 │   │   │   └── CarritoComprasApplication.java
 │   │   ├── resources/
-│   │   │   ├── application.properties       # Configuración
+│   │   │   ├── application.properties
 │   │   │   └── templates/
-│   │   │       └── productos.html           # Vista Thymeleaf
+│   │   │       └── productos.html
 │   │   └── webapp/
 │   └── test/
-├── pom.xml                                   # Dependencias Maven
-└── README.md
+├── pom.xml
+├── README.md
+├── Dockerfile                    # Imagen de la aplicación Spring Boot
+├── docker-compose.yml            # Orquestación: MySQL + App
+└── .env                          # Variables de entorno (puerto, DB, credenciales)
 ```
 
 ---
 
 ## 🔧 Tecnologías Utilizadas
 
-| Tecnología | Versión | Propósito |
-|------------|---------|----------|
-| Spring Boot | 3.5.0 | Framework principal |
-| Spring Data JPA | 3.5.0 | ORM y acceso a datos |
-| Hibernate | 6.6.15.Final | ORM |
-| Thymeleaf | 3.1.3.RELEASE | Motor de plantillas |
-| MySQL | 8.0+ | Base de datos |
-| Maven | 3.x | Build automation |
-| Java | 17+ | Lenguaje de programación |
+| Tecnología        | Versión            | Propósito                     |
+|-------------------|--------------------|-------------------------------|
+| Spring Boot       | 3.5.0              | Framework principal           |
+| Spring Data JPA   | 3.5.0              | ORM y acceso a datos          |
+| Hibernate         | 6.6.15.Final       | ORM                           |
+| Thymeleaf         | 3.1.3.RELEASE      | Motor de plantillas           |
+| MySQL             | 8.0+               | Base de datos                 |
+| Maven             | 3.x                | Build automation              |
+| Java              | 17+                | Lenguaje de programación      |
+| Docker            | Latest             | Contenerización del proyecto  |
 
 ---
 
@@ -277,18 +236,3 @@ Profesor: Pablo Daniel Sandoval
 Este proyecto es de código abierto y puede ser utilizado con propósitos educativos.
 
 ---
-
-## 🎯 Próximas Mejoras (Propuestas)
-
-- [ ] Agregar categorías de productos
-- [ ] Sistema de carrito de compras
-- [ ] Autenticación de usuarios
-- [ ] Filtrado por precio
-- [ ] Cargar imágenes de productos
-- [ ] API REST JSON
-- [ ] Paginación avanzada
-- [ ] Historial de cambios
-
----
-
-**¡Gracias por usar CarritoCompras!** 🎉
