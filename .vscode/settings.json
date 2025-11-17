@@ -1,0 +1,47 @@
+{
+    // ===== GITHUB COPILOT =====
+    "github.copilot.enable": {
+        "*": true
+    },
+    "github.copilot.inlineSuggest.enable": true,
+    "github.copilot.editor.enableAutoCompletions": true,
+    "github.copilot.suggestionDisplay": "inline",
+    "github.copilot.enableCommandCompletions": true,
+
+    // Auto-ejecución sin confirmaciones
+    "github.copilot.chat.autoSend": true,
+    "github.copilot.chat.sendChatAutomatically": true,
+    "github.copilot.chat.askBeforeExecuting": false,
+    "github.copilot.chat.confirmCodeActions": false,
+
+    // Desbloquear todos los features
+    "github.copilot.advanced": {
+        "debug.overrideEngagementFeatures": true
+    },
+    "github.copilot.chat.allowBlockInEditorContextMenu": true,
+    "github.copilot.chat.allowChatInEditor": true,
+
+    // ===== VSCODE: SIN CONFIRMACIONES =====
+    "security.workspace.trust.enabled": false,
+    "security.promptForLocalSources": false,
+
+    // Extensiones sin preguntar
+    "extensions.autoCheckUpdates": true,
+    "extensions.autoUpdate": true,
+    "extensions.confirmedUriHandlerHosts": ["*"],
+
+    // ===== EDITOR =====
+    "editor.inlineSuggest.enabled": true,
+    "editor.suggest.showWords": true,
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": true,
+        "strings": true
+    },
+
+    // ===== VARIOS =====
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 600,
+    "telemetry.telemetryLevel": "off",
+    "java.compile.nullAnalysis.mode": "automatic"
+}

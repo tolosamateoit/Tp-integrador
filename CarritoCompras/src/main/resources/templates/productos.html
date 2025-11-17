@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarritoCompras - Gestión de Productos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-in;
+        }
+
+        .alert-success {
+            background-color: #4caf50;
+            color: white;
+            border-left: 4px solid #45a049;
+        }
+
+        .alert-error {
+            background-color: #f44336;
+            color: white;
+            border-left: 4px solid #da190b;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-form input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .search-form input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-form button, .btn-primary {
+            padding: 12px 30px;
+            background-color: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        .search-form button:hover, .btn-primary:hover {
+            background-color: #5568d3;
+        }
+
+        .btn-reset {
+            padding: 12px 30px;
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .form-buttons button {
+            flex: 1;
+            padding: 12px;
+            font-size: 1em;
+            font-weight: bold;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .form-buttons .btn-save {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .form-buttons .btn-save:hover {
+            background-color: #229954;
+        }
+
+        .form-buttons .btn-cancel {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .form-buttons .btn-cancel:hover {
+            background-color: #7f8c8d;
+        }
+
+        .table-section {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .table-section h2 {
+            color: #667eea;
+            padding: 30px 30px 0 30px;
+            font-size: 1.8em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #667eea;
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .precio {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .fecha {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .actions-col {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-editar {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-editar:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-eliminar {
+            padding: 8px 15px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .btn-eliminar:hover {
+            background-color: #c0392b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            .actions-col {
+                flex-direction: column;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛒 CarritoCompras</h1>
+            <p>Sistema de Gestión de Productos</p>
+        </header>
+
+        <!-- Mensajes de éxito/error -->
+        <div th:if="${mensaje}" class="alert alert-success">
+            <span th:text="${mensaje}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Barra de búsqueda y acciones -->
+        <div class="actions">
+            <form action="/productos" method="get" class="search-form">
+                <input type="text" name="buscar" th:value="${buscar}" placeholder="🔍 Buscar producto por nombre...">
+                <button type="submit">Buscar</button>
+                <a href="/productos" class="btn-reset">Limpiar</a>
+            </form>
+            <button class="btn-primary" onclick="toggleForm()">➕ Nuevo Producto</button>
+        </div>
+
+        <!-- Formulario para crear/editar producto (oculto por defecto) -->
+        <div class="form-section" id="formContainer" style="display: none;">
+            <h2 th:text="${editando} ? 'Editar Producto' : 'Crear Nuevo Producto'">Crear Nuevo Producto</h2>
+            
+            <form th:if="${editando}" th:action="@{/productos/actualizar/{id}(id=${producto.id})}" method="post">
+                <div class="form-group">
+                    <label for="nombre">Nombre del Producto *</label>
+                    <input type="text" id="nombre" name="nombre" th:value="${producto.nombre}" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" th:text="${producto.descripcion}"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="precio">Precio (min 0) *</label>
+                    <input type="number" id="precio" name="precio" th:value="${producto.precio}" step="0.01" min="0" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn-save">💾 Guardar Cambios</button>
+                    <button type="button" class="btn-cancel" onclick="toggleForm()">❌ Cancelar</button>
+                </div>
+            </form>
+
+            <form th:unless="${editando}" action="/productos/crear" method="post">
+                <div class="form-group">
+                    <label for="nombre">Nombre del Producto *</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="precio">Precio (min 0) *</label>
+                    <input type="number" id="precio" name="precio" step="0.01" min="0" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn-save">➕ Crear Producto</button>
+                    <button type="button" class="btn-cancel" onclick="toggleForm()">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabla de productos -->
+        <div class="table-section">
+            <h2>📋 Productos Disponibles</h2>
+            <table th:if="${productos.size() > 0}">
+                <thead>
+                    <tr>
+                        <th style="width: 5%">ID</th>
+                        <th style="width: 20%">Nombre</th>
+                        <th style="width: 35%">Descripción</th>
+                        <th style="width: 12%">Precio</th>
+                        <th style="width: 18%">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="producto : ${productos}">
+                        <td th:text="${producto.id}"></td>
+                        <td th:text="${producto.nombre}"></td>
+                        <td th:text="${producto.descripcion}"></td>
+                        <td class="precio">$<span th:text="${#numbers.formatDecimal(producto.precio, 1, 2)}"></span></td>
+                        <td class="actions-col">
+                            <a th:href="@{/productos/editar/{id}(id=${producto.id})}" class="btn-editar">✏️ Editar</a>
+                            <a th:href="@{/productos/eliminar/{id}(id=${producto.id})}" class="btn-eliminar" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?')">🗑️ Eliminar</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Mensaje cuando no hay productos en búsqueda -->
+            <div th:if="${buscando and productos.size() == 0}" class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <h3>No se encontraron resultados</h3>
+                <br><br>
+                <a href="/productos" class="btn-reset">Volver a la lista completa</a>
+            </div>
+
+            <!-- Mensaje cuando la lista está vacía -->
+            <div th:unless="${buscando or productos.size() > 0}" class="empty-state">
+                <div class="empty-state-icon">📦</div>
+                <h3>No hay productos disponibles</h3>
+                <p>Crea tu primer producto haciendo clic en "Nuevo Producto"</p>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // Variable para saber si estamos editando (evaluado por Thymeleaf)
+        const estaEditando = /*[[${editando ?: false}]]*/ false;
+
+        function toggleForm() {
+            const formContainer = document.getElementById('formContainer');
+            formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
+            if (formContainer.style.display === 'block') {
+                formContainer.scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('nombre').focus();
+            }
+        }
+
+        // Mostrar formulario si estamos editando
+        window.addEventListener('load', function() {
+            if (estaEditando) {
+                document.getElementById('formContainer').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
