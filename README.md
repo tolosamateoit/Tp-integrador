@@ -34,16 +34,11 @@
 
 ```bash
 git clone https://github.com/tolosamateoit/Tp-integrador.git
-cd Tp-integrador/CarritoCompras
 ```
 
 ### Paso 2: instalar docker
 ```bash
 https://www.docker.com/products/docker-desktop/
-```
-
-```bash
-mysql -u root -p
 ```
 
 ### Paso 3: Ejecutar el Proyecto con Docker 🐳
