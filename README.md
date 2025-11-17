@@ -12,11 +12,10 @@
 - ➕ Crear nuevos productos
 - 📋 Listar todos los productos
 - ✏️ Editar productos existentes
-- 🗑️ Eliminar productos (con eliminación lógica)
+- 🗑️ Eliminar productos 
 
 ✅ **Funcionalidades Avanzadas**
 - 🔍 Búsqueda de productos por nombre
-- ⏰ Timestamps automáticos (fecha de creación y actualización)
 - 🚫 Validación de precios (no negativos)
 - 📊 Ordenamiento de productos por ID
 - 💾 Persistencia de datos en base de datos MySQL
@@ -261,9 +260,15 @@ taskkill /PID <PID> /F
 ---
 
 ## 👥 Equipo
+Desarrolladores:
+Tolosa Mateo
+Luciano Agustin Guzmán Ortega
+Ramiro Berardo
 
-**Proyecto Académico - Taller de Construcción de Software**
-- Universidad Siglo XXI
+Profesor: Pablo Daniel Sandoval
+
+**Proyecto Académico - Taller de Construcción de Software** - Catedra B
+- Universidad Siglo XXI - 2025 - Segundo cuatrimestre - Subperiodo B
 
 ---
 
